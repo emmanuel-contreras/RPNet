@@ -105,8 +105,9 @@ for files in sorted(os.listdir(reference_path)):
     patient_reference.append(scipy.io.loadmat(os.path.join(reference_path,files)))
     if count == 20:
       break
+  
 ### Entire thing can be run in a single line
-### patient_reference = [scipy.io.loadmat(os.path.join(reference_path,files)) for files in tqdm(sorted(os.listdir(reference_path)))]
+# patient_reference = [scipy.io.loadmat(os.path.join(reference_path,files)) for files in tqdm(sorted(os.listdir(reference_path)))]
 
 
 # In[23]:
@@ -212,18 +213,19 @@ learn_rate = 0.05
 num_epochs = 20
 
 # In[ ]:
-print("patient_ecg seems to have flipped axes")
-# patient_ecg = patient_ecg.swapaxes(0,1)
-# dist_transform = dist_transform.swapaxes(0,2)
+print(patient_ecg.shape)
+print(dist_transform.shape)
 
-# torch.Size([5000, 1, 20])
-# [ecg signal, ? , patient?]
+
+
+train_test_split = 15
+# train_test_split = 1936
 
 print("Train Dataset")
 patient_ecg_t = torch.from_numpy(patient_ecg).float()
-patient_ecg_train = patient_ecg_t[:1936,:]
+patient_ecg_train = patient_ecg_t[:train_test_split,:]
 patient_ecg_train = patient_ecg_train.view((patient_ecg_train.shape[0],1,patient_ecg_train.shape[1]))
-dist_transform_train = dist_transform[:1936,0,:]
+dist_transform_train = dist_transform[:train_test_split,0,:]
 dist_transform_train = dist_transform_train.view(dist_transform_train.shape[0],1,dist_transform_train.shape[1])
 print("Shape of input:",patient_ecg_train.shape)
 print("Shape of ground truth:",dist_transform_train.shape)
@@ -231,9 +233,9 @@ patient_ecg_tl = TensorDataset(patient_ecg_train,dist_transform_train)
 trainloader = DataLoader(patient_ecg_tl, batch_size=BATCH_SIZE, shuffle = True)
 
 print("Test Dataset")
-patient_ecg_t_test = patient_ecg_t[1936:,:]
+patient_ecg_t_test = patient_ecg_t[train_test_split:,:]
 patient_ecg_t_test = patient_ecg_t_test.view((patient_ecg_t_test.shape[0],1,patient_ecg_t_test.shape[1]))
-dist_transform_test = dist_transform[1936:,:]
+dist_transform_test = dist_transform[train_test_split:,:]
 print("Shape of input:",patient_ecg_t_test.shape)
 print("Shape of ground truth:",dist_transform_test.shape)
 patient_ecg_tl_test = TensorDataset(patient_ecg_t_test,dist_transform_test)
@@ -273,7 +275,7 @@ testloader = DataLoader(patient_ecg_test_td, batch_size=BATCH_SIZE)
 # In[18]:
 
 # TODO look at these arrays to see what should be in each dimension
-record_no = 18
+record_no = 5
 plt.plot(patient_ecg_train[record_no,0,:].numpy())
 plt.plot(dist_transform_train[record_no,0,:].numpy())
 plt.show()
@@ -333,7 +335,7 @@ torch.autograd.set_detect_anomaly(True)
 epoch_loss = []
 min_test_loss = 1000 ### Set a very high number
 
-best_model_name = ""
+best_model_name = "no_model_saved"
 for epoch in tqdm(range(num_epochs)):
     print ('-'*40)
     model.train()
@@ -341,6 +343,9 @@ for epoch in tqdm(range(num_epochs)):
     print ('-'*10)
     net_loss = 0
     
+    print("Note: Dataloader size is determined by batch size")
+    print("Jupyter notebooks shows 31 b/c 1936/64") 
+    # https://discuss.pytorch.org/t/dataloader-length-1-instead-of-number-of-images/64058
     for step,(x,y) in enumerate(trainloader):
         pass
         print("Step no: {}/{}".format(step+1, len(trainloader)))
@@ -416,7 +421,7 @@ ecg = []
 with torch.no_grad():
     net_test_loss = 0 
     for step,(x,y) in enumerate(testloader):
-        print(x.detach().cpu().numpy())
+        
         pass 
         x,y = x.cuda(), y.cuda()
         y_predict_test = model(x)
@@ -426,8 +431,7 @@ with torch.no_grad():
         print('Step: {}, Loss: {} '.format(step,net_test_loss))
     
         ecg.append(x.detach().cpu().numpy())
-        # y_pred_array.append(y_predict_test[:,0,:].cpu().numpy())
-        y_pred_array.append(y_predict_test[:,0,:])
+        y_pred_array.append(y_predict_test[:,0,:].cpu().numpy())
 
 
 
@@ -460,5 +464,5 @@ for j in range(len(peak_locs)):
 
 record_no = 0
 plt.plot(ecg[record_no,:])
-plt.scatter(peak_locs[record_no], y_roll_valleys[record_no])
+plt.scatter(peak_locs[record_no], y_roll_valleys[record_no], c="k")
 plt.show()
