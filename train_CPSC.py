@@ -94,6 +94,9 @@ for files in sorted(os.listdir(data_path)):
     if count == 20:
       break
 
+### Entire thing can be run in a single line
+patient_info = [scipy.io.loadmat(os.path.join(data_path,files)) for files in tqdm(sorted(os.listdir(data_path)))]
+
 
 # In[22]:
 
@@ -107,7 +110,7 @@ for files in sorted(os.listdir(reference_path)):
       break
   
 ### Entire thing can be run in a single line
-# patient_reference = [scipy.io.loadmat(os.path.join(reference_path,files)) for files in tqdm(sorted(os.listdir(reference_path)))]
+patient_reference = [scipy.io.loadmat(os.path.join(reference_path,files)) for files in tqdm(sorted(os.listdir(reference_path)))]
 
 
 # In[23]:
@@ -207,7 +210,7 @@ print(dist_transform.shape)
 # In[4]:
 
 
-BATCH_SIZE = 64
+BATCH_SIZE = 32 #64
 C,H,W = 1,1,5000
 learn_rate = 0.05
 num_epochs = 20
@@ -218,8 +221,8 @@ print(dist_transform.shape)
 
 
 
-train_test_split = 15
-# train_test_split = 1936
+# train_test_split = 15
+train_test_split = 1936
 
 print("Train Dataset")
 patient_ecg_t = torch.from_numpy(patient_ecg).float()
