@@ -347,7 +347,7 @@ for epoch in tqdm(range(num_epochs)):
     net_loss = 0
     
     print("Note: Dataloader size is determined by batch size")
-    print("Jupyter notebooks shows 31 b/c 1936/64") 
+    print("Jupyter notebooks shows 31 steps b/c 1936 samples / batch of 64") 
     # https://discuss.pytorch.org/t/dataloader-length-1-instead-of-number-of-images/64058
     for step,(x,y) in enumerate(trainloader):
         pass
