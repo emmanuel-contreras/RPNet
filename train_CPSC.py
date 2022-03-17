@@ -272,11 +272,11 @@ testloader = DataLoader(patient_ecg_test_td, batch_size=BATCH_SIZE)
 
 # In[18]:
 
-
+# TODO look at these arrays to see what should be in each dimension
 record_no = 18
 plt.plot(patient_ecg_train[record_no,0,:].numpy())
 plt.plot(dist_transform_train[record_no,0,:].numpy())
-
+plt.show()
 
 # ### Ensuring deterministicity through Random seeding
 # 
